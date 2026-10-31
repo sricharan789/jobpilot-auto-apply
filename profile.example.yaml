@@ -1,0 +1,68 @@
+# JobPilot profile. Paste this into the dashboard's Settings page (or save as /data/profile.yaml).
+# Everything here is used to filter jobs, brief Claude, and fill application forms.
+
+candidate:
+  first_name: Alex
+  last_name: ""
+  email: you@example.com
+  phone: "+1 555 555 5555"
+  location: "San Francisco, CA"
+  linkedin: https://www.linkedin.com/in/your-handle
+  github: ""
+  website: ""
+  current_company: ""
+  current_title: ""
+  years_experience: 0
+  resume_path: /data/resume.pdf      # set automatically when you upload on the Settings page
+  work_authorization: "Authorized to work in the US"
+  requires_sponsorship: false         # now or in the future
+  willing_to_relocate: false
+  earliest_start: "2 weeks notice"
+  salary_expectation: ""             # e.g. "$180,000 base", used when a form asks
+  eeo:                                # leave as-is to decline voluntary self-identification
+    gender: Decline to self-identify
+    race: Decline to self-identify
+    veteran: I don't wish to answer
+    disability: I don't wish to answer
+
+preferences:
+  titles:                             # a job matches if all words of any entry appear in its title
+    - software engineer
+    - backend engineer
+  title_exclude: [intern, principal, staff, manager, director, "sales engineer"]
+  locations: ["San Francisco", "Bay Area", "Fremont", "San Jose", "Palo Alto", "Mountain View", "California"]
+  remote_ok: true
+  seniority: mid to senior
+  min_salary: 0
+  min_score: 70                       # only jobs Claude scores at or above this reach your review queue
+  max_age_days: 21
+  dealbreakers: |
+    No contract-only roles. No roles requiring security clearance.
+  notes: |
+    Anything else Claude should weigh: industries you love or avoid, team size, tech you want to use.
+
+search:                               # for LinkedIn / Adzuna / RemoteOK discovery
+  keywords: ["software engineer", "backend engineer"]
+  location: "San Francisco Bay Area"
+  country: us
+
+sources:
+  adzuna: true      # needs ADZUNA_APP_ID / ADZUNA_APP_KEY (free at developer.adzuna.com)
+  linkedin: false   # read-only discovery, no login; turn on knowing LinkedIn may rate-limit
+  remoteok: false
+
+# Companies you most want to work at. Name alone works for most (auto-detected);
+# add careers_url for anyone that shows "board not found" on the Settings page.
+companies:
+  - name: Stripe
+  - name: Figma
+  - name: Notion
+  # - name: NVIDIA
+  #   careers_url: https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite
+
+# Fixed answers to common questions. Matched when the key appears in a form label.
+answers:
+  "How did you hear": "Company careers page"
+  "pronouns": ""
+  "Are you legally authorized to work": "Yes"
+  "require sponsorship": "No"

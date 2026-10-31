@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} · {{ job.company }}{% endblock %}
+{% block body %}
+{% set a = job.assessment or {} %}
+{% set auto = job.ats in ["greenhouse","lever","ashby"] %}
+<p><a href="/">← Back</a></p>
+<div class="card">
+  <div style="display:flex;gap:14px;align-items:flex-start">
+    <span class="score {% if job.score is none %}s-na{% elif job.score >= 80 %}s-hi{% elif job.score >= 65 %}s-mid{% else %}s-lo{% endif %}">{{ job.score if job.score is not none else "–" }}</span>
+    <div>
+      <h2 style="margin:0 0 2px;font-size:20px">{{ job.title }}</h2>
+      <div class="muted">{{ job.company }} · {{ job.location }}{% if job.salary %} · {{ job.salary }}{% endif %}</div>
+      <div class="muted" style="font-size:13px;margin-top:4px">Status: <b>{{ job.status }}</b> · via {{ job.source }} · {{ "auto-apply supported" if auto else "apply manually" }}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn small" href="{{ job.url }}" target="_blank" rel="noopener">View posting</a>
+        <a class="btn small" href="{{ job.apply_url or job.url }}" target="_blank" rel="noopener">Open application</a>
+        <a class="btn small" href="/cover/{{ job.uid }}">Cover letter PDF</a>
+      </div>
+    </div>
+  </div>
+  {% if job.error %}<div class="notice">{{ job.error }}</div>{% endif %}
+  {% if a.summary %}<p>{{ a.summary }}</p>{% endif %}
+  {% if a.eligibility_gate in ["fail","unverified"] or a.language_gate in ["fail","flag"] %}
+    <div class="notice">
+      {% if a.eligibility_gate == "fail" %}<div><b>Eligibility: FAIL.</b> {{ a.eligibility_note }}</div>{% endif %}
+      {% if a.eligibility_gate == "unverified" %}<div><b>Eligibility: unverified</b> — posting is silent on work rights; check the employer's page before applying. {{ a.eligibility_note }}</div>{% endif %}
+      {% if a.language_gate == "fail" %}<div><b>Language: FAIL.</b> {{ a.language_note }}</div>{% endif %}
+      {% if a.language_gate == "flag" %}<div><b>Language: check.</b> {{ a.language_note }}</div>{% endif %}
+    </div>
+  {% endif %}
+  {% if a.technical_skills is defined %}
+    <details><summary>Dimension scores</summary>
+      <table style="font-size:14px;margin-top:8px">
+        <tr><td>Technical skills</td><td style="padding-left:14px"><b>{{ a.technical_skills }}</b>/100</td></tr>
+        <tr><td>Experience match</td><td style="padding-left:14px"><b>{{ a.experience_match }}</b>/100</td></tr>
+        <tr><td>Culture fit</td><td style="padding-left:14px"><b>{{ a.culture_fit }}</b>/100</td></tr>
+        <tr><td>Career alignment</td><td style="padding-left:14px"><b>{{ a.career_alignment }}</b>/100</td></tr>
+        <tr><td>Location</td><td style="padding-left:14px"><b>{{ a.location_logistics }}</b></td></tr>
+      </table>
+    </details>
+  {% endif %}
+  {% if a.review_issues %}<details><summary>Reviewer notes ({{ a.review_verdict }})</summary><ul>{% for m in a.review_issues %}<li>{{ m }}</li>{% endfor %}</ul></details>{% endif %}
+  {% if a.matched %}<details open><summary>Why it fits</summary><ul>{% for m in a.matched %}<li>{{ m }}</li>{% endfor %}</ul></details>{% endif %}
+  {% if a.gaps %}<details><summary>Gaps</summary><ul>{% for m in a.gaps %}<li>{{ m }}</li>{% endfor %}</ul></details>{% endif %}
+  {% if a.red_flags %}<details open><summary style="color:var(--warn)">Red flags</summary><ul>{% for m in a.red_flags %}<li>{{ m }}</li>{% endfor %}</ul></details>{% endif %}
+</div>
+
+<form method="post" action="/act">
+  <input type="hidden" name="uid" value="{{ job.uid }}">
+  <div class="card">
+    <h3 style="margin-top:0">Cover letter</h3>
+    <textarea name="cover_letter" rows="12">{{ job.cover_letter or "" }}</textarea>
+  </div>
+
+  {% if job.answers %}
+  <div class="card">
+    <h3 style="margin-top:0">Application answers</h3>
+    <p class="muted" style="font-size:14px">These are exactly what will be submitted. Edit anything before approving. Answers marked <b>check</b> were guesses.</p>
+    {% for key, ans in job.answers.items() %}
+      <div style="margin-bottom:12px">
+        <label style="font-size:14px;font-weight:600">{{ ans.label or key }}
+          {% if not ans.confident %}<span class="pill" style="color:var(--warn);border-color:var(--warn)">check</span>{% endif %}
+          <span class="muted" style="font-weight:400;font-size:12px">· {{ ans.source }}</span></label>
+        {% if ans.value is string and ans.value|length > 90 %}
+          <textarea name="ans::{{ key }}" rows="4">{{ ans.value }}</textarea>
+        {% else %}
+          <input type="text" name="ans::{{ key }}" value="{{ ans.value }}">
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if job.screenshot %}
+  <details class="card"><summary>Screenshot of the filled form</summary>
+    <a href="/shots/{{ job.screenshot }}" target="_blank"><img class="shot" src="/shots/{{ job.screenshot }}" alt="Filled application form" style="margin-top:10px"></a>
+  </details>
+  {% endif %}
+
+  <div class="card" style="display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:8px">
+    {% if job.status in ["review","attention","low_score","skipped"] %}
+      {% if auto and job.answers %}
+        <button class="btn primary" name="action" value="approve">Approve & submit</button>
+      {% elif auto %}
+        <button class="btn primary" name="action" value="prepare">Pre-fill application</button>
+      {% endif %}
+      <button class="btn" name="action" value="applied">I applied myself</button>
+      <button class="btn" name="action" value="skip">Skip</button>
+    {% endif %}
+    <button class="btn" name="action" value="save">Save edits</button>
+    {% if auto and job.answers and job.status != "applied" %}<button class="btn" name="action" value="prepare">Re-fill form</button>{% endif %}
+  </div>
+</form>
+
+<details class="card"><summary>Job description</summary>
+  <div style="white-space:pre-wrap;font-size:14px;margin-top:10px">{{ job.description }}</div>
+</details>
+{% endblock %}

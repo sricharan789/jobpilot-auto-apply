@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}JobPilot{% endblock %}</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --ink:#1d1d1b; --muted:#6b6a65; --line:#e4e2dc; --accent:#1f5f4a;
+          --accent-ink:#fff; --warn:#a14a12; --warn-bg:#fdf0e6; --good:#1f5f4a; --mid:#8a6d12; --low:#9a3b33; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161614; --card:#1f1f1c; --ink:#ecebe6; --muted:#9d9b94;
+          --line:#33322e; --accent:#5fb393; --accent-ink:#0e1a15; --warn:#f0a36b; --warn-bg:#2d2219; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system, "Segoe UI", Inter, sans-serif; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px;
+           border-bottom:1px solid var(--line); background:var(--card); position:sticky; top:0; z-index:5; }
+  header a.brand { font-weight:700; letter-spacing:-.01em; color:var(--ink); text-decoration:none; }
+  header nav { display:flex; gap:14px; font-size:14px; }
+  main { max-width:880px; margin:0 auto; padding:16px; }
+  a { color:var(--accent); }
+  .muted { color:var(--muted); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .btn { display:inline-block; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px;
+         padding:9px 14px; font:inherit; font-size:14px; cursor:pointer; text-decoration:none; }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600; }
+  .btn.small { padding:5px 10px; font-size:13px; }
+  .score { display:inline-flex; align-items:center; justify-content:center; min-width:42px; height:42px; border-radius:10px;
+           font-weight:700; font-size:16px; color:#fff; flex-shrink:0; }
+  .s-hi { background:var(--good); } .s-mid { background:var(--mid); } .s-lo { background:var(--low); } .s-na { background:var(--muted); }
+  .pill { display:inline-block; font-size:12px; padding:1px 8px; border-radius:99px; border:1px solid var(--line); color:var(--muted); }
+  .pill.target { border-color:var(--accent); color:var(--accent); }
+  .notice { background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:10px 14px; margin:10px 0; font-size:14px; }
+  textarea, input[type=text] { width:100%; font:inherit; font-size:14px; padding:8px 10px; border:1px solid var(--line);
+           border-radius:8px; background:var(--bg); color:var(--ink); }
+  img.shot { width:100%; border:1px solid var(--line); border-radius:8px; }
+  details summary { cursor:pointer; font-weight:600; }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">JobPilot</a>
+  <nav><a href="/">Jobs</a><a href="/settings">Settings</a></nav>
+</header>
+<main>{% block body %}{% endblock %}</main>
+</body>
+</html>

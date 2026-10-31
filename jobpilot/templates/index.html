@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% macro badge(s) -%}
+  <span class="score {% if s is none %}s-na{% elif s >= 80 %}s-hi{% elif s >= 65 %}s-mid{% else %}s-lo{% endif %}">{{ s if s is not none else "–" }}</span>
+{%- endmacro %}
+{% block body %}
+{% if not profile_ok %}
+  <div class="notice">No profile yet. Go to <a href="/settings">Settings</a> to paste your profile and upload your resume.</div>
+{% endif %}
+{% if settings.dry_run %}
+  <div class="notice">Dry-run mode: approved applications are filled but not submitted. Set <code>DRY_RUN=false</code> when you're happy with the results.</div>
+{% endif %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+  <div class="muted" style="font-size:14px">Status: {{ status }}</div>
+  <form method="post" action="/run"><button class="btn small">Run discovery now</button></form>
+</div>
+
+<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px">
+{% for key, (label, _) in tabs.items() %}
+  <a class="btn small {% if key == tab %}primary{% endif %}" href="/?tab={{ key }}" style="white-space:nowrap">{{ label }} · {{ tab_counts[key] }}</a>
+{% endfor %}
+</div>
+
+{% for j in jobs %}
+  {% set a = j.assessment or {} %}
+  <a href="/job/{{ j.uid }}" style="text-decoration:none;color:inherit">
+  <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+    {{ badge(j.score) }}
+    <div style="min-width:0">
+      <div style="font-weight:600">{{ j.title }}</div>
+      <div class="muted" style="font-size:14px">{{ j.company }} · {{ j.location or "Location n/a" }}{% if j.salary %} · {{ j.salary }}{% endif %}</div>
+      {% if a.summary %}<div style="font-size:14px;margin-top:4px">{{ a.summary }}</div>{% endif %}
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+        <span class="pill">{{ j.source }}</span>
+        {% if j.ats in ["greenhouse","lever","ashby"] %}<span class="pill">auto-apply</span>{% else %}<span class="pill">manual apply</span>{% endif %}
+        {% if (j.ats_meta or {}).target %}<span class="pill target">target company</span>{% endif %}
+        {% if j.error and j.status in ["review","attention"] %}<span class="pill" style="color:var(--warn)">needs a look</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  </a>
+{% else %}
+  <div class="card muted">Nothing here yet.</div>
+{% endfor %}
+
+<details style="margin-top:20px"><summary class="muted">Recent activity</summary>
+  {% for e in events %}<div class="muted" style="font-size:13px;margin-top:6px">{{ e.ts[:16].replace("T"," ") }} · {{ e.kind }} · {{ e.message }}</div>{% endfor %}
+</details>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Settings · JobPilot{% endblock %}
+{% block body %}
+{% if msg %}<div class="notice">{{ msg }}</div>{% endif %}
+
+<div class="card">
+  <h3 style="margin-top:0">Resume</h3>
+  <p class="muted" style="font-size:14px">{% if resume %}Current: <b>{{ resume }}</b>{% else %}No resume uploaded yet.{% endif %}</p>
+  <form method="post" action="/settings/resume" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap">
+    <input type="file" name="file" accept=".pdf,.docx,.txt" required>
+    <button class="btn primary">Upload</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Profile {% if not exists %}<span class="pill">not saved yet: example shown</span>{% endif %}</h3>
+  <form method="post" action="/settings/profile">
+    <textarea name="profile_yaml" rows="30" style="font-family:ui-monospace,Menlo,monospace;font-size:13px">{{ profile_text }}</textarea>
+    <p><button class="btn primary">Save profile</button></p>
+  </form>
+</div>
+
+{% if companies %}
+<div class="card">
+  <h3 style="margin-top:0">Target companies</h3>
+  {% for name, c in companies %}
+    <div style="font-size:14px;margin:4px 0">{{ name }}:
+      {% if c and c.ats %}<span class="pill">{{ c.ats }}{% if c.meta.slug %} / {{ c.meta.slug }}{% endif %}</span>
+      {% elif c %}<span style="color:var(--warn)">board not found, add careers_url</span>
+      {% else %}<span class="muted">checked on next run</span>{% endif %}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card muted" style="font-size:14px">
+  Model: {{ settings.claude_model }} · Discovery every {{ settings.discover_every_hours }}h ·
+  Daily cap {{ settings.max_applications_per_day }} · Dry run: {{ settings.dry_run }}
+</div>
+{% endblock %}
